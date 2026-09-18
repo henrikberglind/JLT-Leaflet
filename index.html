@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>JLT Leaflet</title>
+	 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>	
+	
+	<style>
+		#map {
+			height: 900px;
+			width: 100%;
+		}
+        body {
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+<div id="map"></div>
+<script>
+const map = L.map('map').setView([57.7826, 14.1618], 10);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+const geojsonUrl = 'https://githubusercontent.com';
+
+fetch(geojsonUrl)
+    .then(response => response.json())
+    .then(data => {
+        L.geoJSON(data, {
+            style: function(feature) {
+                return {
+                    color: feature.properties.route_color ? `#${feature.properties.route_color}` : '#0074D9',
+                    weight: 3,
+                    opacity: 0.8
+                };
+            },
+            onEachFeature: function(feature, layer) {
+                if (feature.properties && feature.properties.route_short_name) {
+                    layer.bindPopup(`<b>Busslinje:</b> ${feature.properties.route_short_name}<br><b>Sträcka:</b> ${feature.properties.route_long_name || 'Information saknas'}`);
+                }
+            }
+        }).addTo(map);
+    })
+    .catch(err => console.error('Kunde inte läsa JLT-data:', err));
+</script>
+</body>
+</html>
